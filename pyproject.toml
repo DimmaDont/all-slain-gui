@@ -1,0 +1,71 @@
+[project]
+name = "allslain_gui"
+
+dynamic = ["version"]
+description = "Star Citizen Game Log Event Viewer"
+
+readme = "README.md"
+requires-python = ">=3.13"
+
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+
+dependencies = [
+    "allslain[app] @ git+https://github.com/DimmaDont/all-slain",
+    "psutil",
+    "pyqt6",
+]
+
+[project.optional-dependencies]
+build_app = [
+    "pyinstaller @ https://github.com/DimmaDont/Pyinstaller-Builds/raw/8bafce381619e690c399bc016386b76ff49bc7f6/x86_64/pyinstaller-6.12.0-py3-none-any.whl",
+    "setuptools-scm",
+]
+extra = ["lxml"]
+all = ["allslain_gui[build_app,extra]"]
+
+[project.urls]
+homepage = "https://github.com/DimmaDont/all-slain-gui"
+source = "https://github.com/DimmaDont/all-slain-gui"
+issues = "https://github.com/DimmaDont/all-slain-gui/issues"
+
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+
+[tool]
+
+[tool.black]
+target-version = ['py313']
+
+[tool.isort]
+lines_after_imports = 2
+profile = "black"
+
+[tool.mypy]
+check_untyped_defs = true
+files = ["."]
+strict_equality = true
+
+[tool.pylint]
+ignore-paths = "venv"
+
+[tool.pylint.main]
+extension-pkg-whitelist = ["PyQt6"]
+
+[tool.pylint.'MESSAGES CONTROL']
+disable = [
+    "import-outside-toplevel",
+    "line-too-long",
+    "missing-class-docstring",
+    "missing-function-docstring",
+    "missing-module-docstring",
+    "too-few-public-methods",
+]
+
+[tool.setuptools]
+package-dir = { "allslain_gui" = "src" }
+
+[tool.setuptools_scm]

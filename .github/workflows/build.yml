@@ -1,0 +1,21 @@
+name: Build
+on:
+  push:
+    branches:
+      - 'master'
+jobs:
+  build:
+    name: Build
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
+    uses: ./.github/workflows/pyinstaller.yml
+    with:
+      file: main.pyw
+      name: allslain_gui
+      icon: icon/ded.ico
+      output: dist/allslain_gui.exe
+      attest: false
+      release: true
+      tag_name: latest

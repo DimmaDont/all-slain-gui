@@ -1,0 +1,113 @@
+name: Build-PyInstaller
+on:
+  workflow_call:
+    inputs:
+      os:
+        required: false
+        type: string
+        default: windows-latest
+      python-version:
+        required: false
+        type: string
+        default: 3.x
+      file:
+        required: true
+        type: string
+      name:
+        required: true
+        type: string
+      icon:
+        required: true
+        type: string
+      output:
+        required: true
+        type: string
+      attest:
+        required: false
+        type: boolean
+        default: false
+      release:
+        required: false
+        type: boolean
+        default: false
+      tag_name:
+        required: false
+        type: string
+        default: ''
+jobs:
+  build:
+    name: PyInstaller
+    runs-on: ${{ inputs.os }}
+    defaults:
+      run:
+        shell: bash
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: ${{ !inputs.tag_name }}
+      - name: Checkout
+        uses: actions/checkout@v4
+        if: ${{ inputs.tag_name }}
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          architecture: x64
+          cache: pip
+      - name: Install Dependencies
+        run: pip install -e .[build_app]
+      - name: Package Application
+        run: pyinstaller --onefile ${{ inputs.file }} --name ${{ inputs.name }} --icon ${{ inputs.icon }} --noupx --debug noarchive --add-data icon:icon --exclude-module pkg_resources --optimize 2
+      - name: Attest
+        id: attest
+        uses: actions/attest-build-provenance@v2
+        if: ${{ inputs.attest }}
+        with:
+          subject-path: ${{ github.workspace }}/dist
+      - name: Get file hash
+        shell: pwsh
+        id: hash
+        if: ${{ inputs.release && !inputs.tag_name }}
+        run: |
+          "file_hash=$((Get-FileHash ${{ inputs.output }}).Hash.ToLower())" >> $env:GITHUB_OUTPUT
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: exe
+          path: ${{ inputs.output }}
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.release && !inputs.tag_name }}
+        with:
+          append_body: true
+          body: |
+            **Attestation**: [`${{ steps.attest.outputs.attestation-id }}`](${{ steps.attest.outputs.attestation-url }})
+            **VirusTotal**: [`${{ steps.hash.outputs.file_hash }}`](https://www.virustotal.com/gui/file/${{ steps.hash.outputs.file_hash }})
+          files: ${{ inputs.output }}
+
+      - name: Get commit hash
+        id: vars
+        if: ${{ inputs.release && inputs.tag_name }}
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.release && inputs.tag_name && inputs.attest }}
+        with:
+          body: This is the latest build of `${{ github.ref_name }}`, [built](${{ steps.attest.outputs.attestation-url }}) from commit ${{ steps.vars.outputs.sha_short }}.
+          files: ${{ inputs.output }}
+          tag_name: ${{ inputs.tag_name }}
+          prerelease: true
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.release && inputs.tag_name && !inputs.attest}}
+        with:
+          body: This is the latest build of `${{ github.ref_name }}`, built from commit ${{ steps.vars.outputs.sha_short }}.
+          files: ${{ inputs.output }}
+          tag_name: ${{ inputs.tag_name }}
+          prerelease: true

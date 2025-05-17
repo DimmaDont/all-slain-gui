@@ -1,0 +1,9 @@
+__pycache__/
+*.egg-info/
+
+*.spec
+build/
+dist/
+
+allslain.conf.toml
+allslain_gui.conf.toml
