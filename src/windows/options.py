@@ -112,7 +112,10 @@ class Options(QWidget):
         input_auto_exit = QCheckBox()
         input_auto_exit.setChecked(self.config_gui["main"]["auto_exit"])
         input_auto_exit.clicked.connect(self.save_auto_exit)
-        input_auto_exit.setToolTip("Exit with Star Citizen.<br>Every 5 seconds, checks to see if the game is still running.")
+        input_auto_exit.setToolTip(
+            "Exit with Star Citizen.<br>"
+            "Every 5 seconds, checks to see if the game is still running."
+        )
         self.form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
 
         self.form.addRow(hr())
@@ -209,7 +212,7 @@ class Options(QWidget):
         save_config_allslain(self.config_als)
         # self.input_player_lookup.setDisabled(False)
 
-    def save_dataprovider_provider(self, text):
+    def save_dataprovider_provider(self, text: str):
         # Requires a restart
         dp = DATA_PROVIDERS.get(text)
         self.input_starcitizen_api_key.setDisabled(dp != "starcitizen_api")
@@ -225,12 +228,9 @@ class Options(QWidget):
         self.config_als["data_provider"]["provider"] = dp
         save_config_allslain(self.config_als)
 
-    def save_org_theme(self):
-        self.config_als["data_provider"][
-            "use_org_theme"
-        ] = self.parent().app.allslain.args.data_provider.use_org_theme = (
-            not self.parent().app.allslain.args.data_provider.use_org_theme
-        )
+    def save_org_theme(self, use_org_theme: bool):
+        self.config_als["data_provider"]["use_org_theme"] = use_org_theme
+        self.parent().app.allslain.args.data_provider.use_org_theme = use_org_theme
         save_config_allslain(self.config_als)
 
     def save_starcitizen_api_key(self, api_key: str):

@@ -32,6 +32,9 @@ class Overlay(QWidget):
         alignment = Qt.AlignmentFlag.AlignLeft
         if config_gui["main"]["overlay_position"] == "bottom":
             alignment |= Qt.AlignmentFlag.AlignBottom
+        else:
+            alignment |= Qt.AlignmentFlag.AlignTop
+        self.set_geometry_qrect_alignment(alignment)
 
         # Don't take up the whole width, it breaks the tray menu
         self.setWindowFlags(
@@ -40,7 +43,6 @@ class Overlay(QWidget):
             | Qt.WindowType.Tool  # Hide from taskbar
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.set_geometry_qrect_alignment(alignment)
 
         self.lines = deque(
             [

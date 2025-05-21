@@ -6,13 +6,7 @@ from typing import TYPE_CHECKING
 from allslain.version import VersionCheckResult
 from PyQt6.QtCore import QTimer, QUrl
 from PyQt6.QtGui import QAction, QDesktopServices
-from PyQt6.QtWidgets import (
-    QLabel,
-    QMainWindow,
-    QMenu,
-    QSystemTrayIcon,
-    QWidgetAction,
-)
+from PyQt6.QtWidgets import QLabel, QMainWindow, QMenu, QSystemTrayIcon, QWidgetAction
 
 from src.functions import get_icon
 from src.update import UpdateCheck
