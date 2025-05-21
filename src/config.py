@@ -3,13 +3,7 @@ from argparse import Namespace
 from typing import Literal, cast
 
 from allslain.config import TOMLFile, executable_path, merge, mergeattr
-from tomlkit import (
-    TOMLDocument,
-    comment,
-    document,
-    nl,
-    table,
-)
+from tomlkit import TOMLDocument, comment, document, nl, table
 
 
 CONFIG_NAME = f"{executable_path()}/allslain_gui.conf.toml"

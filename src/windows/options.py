@@ -105,7 +105,10 @@ class Options(QWidget):
         input_auto_exit = QCheckBox()
         input_auto_exit.setChecked(self.config_gui["main"]["auto_exit"])
         input_auto_exit.clicked.connect(self.save_auto_exit)
-        input_auto_exit.setToolTip("Exit with Star Citizen.<br>Every 5 seconds, checks to see if the game is still running.")
+        input_auto_exit.setToolTip(
+            "Exit with Star Citizen.<br>"
+            "Every 5 seconds, checks to see if the game is still running."
+        )
         self.form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
 
         self.form.addRow(hr())
