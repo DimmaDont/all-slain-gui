@@ -11,9 +11,13 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 
 dependencies = [
-    "allslain[app] @ git+https://github.com/DimmaDont/all-slain",
+    "allslain @ git+https://github.com/DimmaDont/all-slain",
+    "bs4",
     "psutil",
     "pyqt6",
+    "requests",
+    "semver",
+    "tomlkit",
 ]
 
 [project.optional-dependencies]
