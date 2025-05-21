@@ -9,7 +9,6 @@ from .config import Config
 
 class Args(Config):
     debug: bool
-    file: str | None = None
 
 
 logging.basicConfig(format=logging.BASIC_FORMAT)
@@ -31,9 +30,6 @@ def parse_args(namespace) -> Args:
 
     if args.debug:
         logger.setLevel(logging.DEBUG)
-
-    # args are passed to allslain's log parser, which expects certain attributes to exist
-    args.file = None
-    args.replay = False
+        logging.getLogger("allslain").setLevel(logging.DEBUG)
 
     return args

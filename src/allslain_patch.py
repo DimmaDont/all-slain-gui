@@ -135,6 +135,8 @@ class AllSlain(QThread):
         LogParser.follow = logparser_follow
 
         _self.args = cast(Args, load_config_runtime(gui_args))
+        _self.args.file = None
+        _self.args.replay = False
 
         _self.config = load_config()
 
