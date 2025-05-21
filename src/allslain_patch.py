@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime
 import logging
 from io import TextIOWrapper
+from pathlib import Path
 from struct import pack
 from typing import TYPE_CHECKING, cast
 
@@ -17,7 +18,6 @@ from allslain.colorize import Color
 from allslain.config import load_config, load_config_runtime
 from allslain.handlers.character import Character
 from allslain.handlers.handler import Handler
-from allslain.launcher_store import get_log
 from allslain.log_parser import LogParser
 from psutil import process_iter
 from PyQt6.QtCore import QThread
@@ -121,7 +121,7 @@ class AllSlain(QThread):
                     else:
                         _self.msleep(1000)
                         if check_running_counter > 5:
-                            if not _self.is_game_running():
+                            if _self.get_game_proc() is None:
                                 break
                             check_running_counter = 0
                         check_running_counter += 1
@@ -141,22 +141,20 @@ class AllSlain(QThread):
     def stopping(self):
         self._stopping = True
 
-    def is_game_running(self) -> bool:
-        return (
-            next(
-                (proc for proc in process_iter() if proc.name() == GAME_EXE),
-                None,
-            )
-            is not None
+    def get_game_proc(self):
+        return next(
+            (proc for proc in process_iter() if proc.name() == GAME_EXE),
+            None,
         )
 
     def wait_game(self):
         while not self._stopping:
-            if not self.is_game_running():
+            proc = self.get_game_proc()
+            if proc is None:
                 self.msleep(1000)
                 continue
 
-            self.args.file = get_log()
+            self.args.file = str(Path(Path(proc.exe()).parent.parent, R"Game.log"))
             break
 
         self._initialized = True
