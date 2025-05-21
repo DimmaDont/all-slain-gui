@@ -96,7 +96,14 @@ class Options(QWidget):
         input_overlay_pos = QComboBox()
         input_overlay_pos.addItems(OVERLAY_POSITIONS.keys())
         input_overlay_pos.setCurrentText(
-            str(self.config_gui["main"]["overlay_position"])
+            next(
+                (
+                    k
+                    for k, v in OVERLAY_POSITIONS.items()
+                    if v == self.config_gui["main"]["overlay_position"]
+                ),
+                next(iter(OVERLAY_POSITIONS.keys())),
+            )
         )
         input_overlay_pos.currentTextChanged.connect(self.overlay_update_position.emit)
         input_overlay_pos.currentTextChanged.connect(self.save_overlay_position)

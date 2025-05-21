@@ -30,7 +30,7 @@ class Overlay(QWidget):
         config_gui = mw.options.parent().app.config
 
         alignment = Qt.AlignmentFlag.AlignLeft
-        if config_gui["main"]["overlay_position"] == 1:
+        if config_gui["main"]["overlay_position"] == "bottom":
             alignment |= Qt.AlignmentFlag.AlignBottom
 
         # Don't take up the whole width, it breaks the tray menu
@@ -51,7 +51,7 @@ class Overlay(QWidget):
         )
 
         self.text = QLabel(self)
-        if config_gui["main"]["overlay_position"] == 1:
+        if config_gui["main"]["overlay_position"] == "bottom":
             self.text.setAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
             )
@@ -62,7 +62,7 @@ class Overlay(QWidget):
 
         effect = QGraphicsDropShadowEffect(self)
         effect.setBlurRadius(0)
-        effect.setColor(QColor("#22222"))
+        effect.setColor(QColor("#222222"))
         effect.setOffset(1, 1)
         self.text.setGraphicsEffect(effect)
 
