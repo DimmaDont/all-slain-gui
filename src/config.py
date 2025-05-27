@@ -12,6 +12,7 @@ CONFIG_NAME = f"{executable_path()}/allslain_gui.conf.toml"
 class Config(Namespace):
     overlay_position: Literal["top", "bottom"] = "top"
     auto_exit: bool = True
+    line_count: int = 3
 
 
 # fmt: off
@@ -28,6 +29,11 @@ def create_default_config() -> TOMLDocument:
     main.add(comment("Whether all-slain-gui should also quit when Star Citizen quits."))
     main.add(comment('Default: true'))
     main.add("auto_exit", Config.auto_exit)
+    main.add(nl())
+
+    main.add(comment("Number of lines to display in the overlay"))
+    main.add(comment('Default: 3'))
+    main.add("line_count", Config.line_count)
     main.add(nl())
 
     doc.add("main", main)

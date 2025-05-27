@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
         self.overlay.show()
 
         self.options.overlay_update_position.connect(self.overlay.update_position)
+        self.options.overlay_update_line_count.connect(self.overlay.update_line_count)
 
         self.app.allslain.output.connect(self.overlay.update_text)
 

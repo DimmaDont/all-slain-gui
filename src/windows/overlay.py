@@ -46,14 +46,6 @@ class Overlay(QWidget):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        self.lines = deque(
-            [
-                '<span style="color:white;">all-slain: Star Citizen Game Log Reader</span>',
-                '<span style="color:#1050FF;">https://github.com/DimmaDont/all-slain-gui</span>',
-                "Waiting for Star Citizen to start...",
-            ]
-        )
-
         self.text = QLabel(self)
         if config_gui["main"]["overlay_position"] == "bottom":
             self.text.setAlignment(
@@ -82,6 +74,15 @@ class Overlay(QWidget):
         # if __debug__:
         #     stylesheet += "background-color: blue;"
         self.text.setStyleSheet(stylesheet)
+        self.lines = deque(
+            [
+                '<span style="color:white;">all-slain: Star Citizen Game Log Reader</span>',
+                '<span style="color:#1050FF;">https://github.com/DimmaDont/all-slain-gui</span>',
+                "Waiting for Star Citizen to start...",
+            ]
+        )
+        for _ in range(config_gui["main"]["line_count"] - len(self.lines)):
+            self.lines.appendleft("")
         self.text.setText("<br>".join(self.lines))
         self.text.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
         self.text.show()
@@ -103,8 +104,8 @@ class Overlay(QWidget):
         self.lines.append(text)
         self.text.setText("<br>".join(self.lines))
 
-    def update_position(self, pos_name):
-        logger.debug(f"overlay pos {str(pos_name)}")
+    def update_position(self, pos_name: str):
+        logger.debug(f"overlay pos {pos_name}")
         alignment = Qt.AlignmentFlag.AlignLeft
         alignment |= (
             Qt.AlignmentFlag.AlignBottom
@@ -130,7 +131,16 @@ class Overlay(QWidget):
         qrect = QStyle.alignedRect(
             Qt.LayoutDirection.LeftToRight,
             alignment,
-            QSize(int(geometry.width() * 0.66), 50),
+            QSize(int(geometry.width() * 0.66), 100),
             geometry,
         )
         self.setGeometry(qrect)
+        if layout := self.layout():
+            layout.setAlignment(alignment)
+
+    def update_line_count(self, lines: int):
+        while len(self.lines) > lines:
+            self.lines.popleft()
+        while len(self.lines) < lines:
+            self.lines.appendleft("")
+        self.text.setText("<br>".join(self.lines))

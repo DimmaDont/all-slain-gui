@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QLabel,
     QLineEdit,
+    QSpinBox,
     QStyle,
     QWidget,
 )
@@ -60,6 +61,7 @@ RED_ASTERISK = '<span style="color: red">*</span>'
 class Options(QWidget):
     parent: Callable[[], MainWindow]
     overlay_update_position = Signal(str)
+    overlay_update_line_count = Signal(int)
 
     def show(self):
         super().show()
@@ -117,6 +119,14 @@ class Options(QWidget):
             "Every 5 seconds, checks to see if the game is still running."
         )
         self.form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
+
+        input_line_count = QSpinBox()
+        input_line_count.setMinimum(3)
+        input_line_count.setMaximum(5)
+        input_line_count.setValue(self.config_gui["main"]["line_count"])
+        input_line_count.valueChanged.connect(self.overlay_update_line_count.emit)
+        input_line_count.valueChanged.connect(self.save_line_count)
+        self.form.addRow(QLabel("Lines Shown"), input_line_count)
 
         self.form.addRow(hr())
 
@@ -203,6 +213,10 @@ class Options(QWidget):
 
     def save_auto_exit(self, auto_exit: bool):
         self.config_gui["main"]["auto_exit"] = auto_exit
+        save_config(self.config_gui)
+
+    def save_line_count(self, line_count: int):
+        self.config_gui["main"]["line_count"] = line_count
         save_config(self.config_gui)
 
     def save_player_lookup(self, player_lookup: bool):
