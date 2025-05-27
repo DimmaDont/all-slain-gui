@@ -4,6 +4,8 @@ import logging
 from collections import deque
 from typing import TYPE_CHECKING
 
+import win32con
+import win32gui
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -89,6 +91,12 @@ class Overlay(QWidget):
         layout.setSpacing(0)
         layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+
+        win32gui.SetWindowLong(
+            int(self.winId()),
+            win32con.GWL_EXSTYLE,
+            win32con.WS_EX_NOACTIVATE,
+        )
 
     def update_text(self, text: str):
         self.lines.popleft()

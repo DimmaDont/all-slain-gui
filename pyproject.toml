@@ -15,6 +15,7 @@ dependencies = [
     "bs4",
     "psutil",
     "pyqt6",
+    "pywin32",
     "requests",
     "semver",
     "tomlkit",
@@ -57,7 +58,7 @@ strict_equality = true
 ignore-paths = "venv"
 
 [tool.pylint.main]
-extension-pkg-whitelist = ["PyQt6"]
+extension-pkg-whitelist = ["PyQt6", "win32gui"]
 
 [tool.pylint.'MESSAGES CONTROL']
 disable = [
