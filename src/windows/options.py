@@ -13,11 +13,13 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QFormLayout,
     QFrame,
+    QGroupBox,
     QLabel,
     QLineEdit,
     QPushButton,
     QSpinBox,
     QStyle,
+    QTabWidget,
     QWidget,
 )
 
@@ -89,28 +91,48 @@ class Options(QWidget):
         )
         self.setGeometry(qrect)
 
-        self.form = QFormLayout()
-        self.setLayout(self.form)
+        form = QFormLayout()
+        self.setLayout(form)
 
-        # layout.setSpacing(0)
+        widget_tab = QTabWidget()
+        widget_tab.addTab(self.create_widget_overlay(), "Overlay")
+        widget_tab.addTab(self.create_widget_allslain(), "all-slain")
+        form.addRow(widget_tab)
 
-        self.form.addRow(QLabel("<b>Overlay</b>"))
+        restart_button = QPushButton()
+        restart_button.setText("Restart")
+        restart_button.clicked.connect(self.parent().slot_reboot)
+        form.addRow(
+            QLabel('<span style="color: red">*</span> Requires restart'),
+            restart_button,
+        )
+
+    def create_widget_overlay(self):
+        form = QFormLayout()
+
+        overlay_pos = next(
+            (
+                k
+                for k, v in OVERLAY_POSITIONS.items()
+                if v == self.config_gui["main"]["overlay_position"]
+            ),
+            next(iter(OVERLAY_POSITIONS.keys())),
+        )
 
         input_overlay_pos = QComboBox()
         input_overlay_pos.addItems(OVERLAY_POSITIONS.keys())
-        input_overlay_pos.setCurrentText(
-            next(
-                (
-                    k
-                    for k, v in OVERLAY_POSITIONS.items()
-                    if v == self.config_gui["main"]["overlay_position"]
-                ),
-                next(iter(OVERLAY_POSITIONS.keys())),
-            )
-        )
+        input_overlay_pos.setCurrentText(overlay_pos)
         input_overlay_pos.currentTextChanged.connect(self.overlay_update_position.emit)
         input_overlay_pos.currentTextChanged.connect(self.save_overlay_position)
-        self.form.addRow(QLabel("Position"), input_overlay_pos)
+        form.addRow(QLabel("Position"), input_overlay_pos)
+
+        input_line_count = QSpinBox()
+        input_line_count.setMinimum(3)
+        input_line_count.setMaximum(5)
+        input_line_count.setValue(self.config_gui["main"]["line_count"])
+        input_line_count.valueChanged.connect(self.overlay_update_line_count.emit)
+        input_line_count.valueChanged.connect(self.save_line_count)
+        form.addRow(QLabel("Lines Shown"), input_line_count)
 
         input_auto_exit = QCheckBox()
         input_auto_exit.setChecked(self.config_gui["main"]["auto_exit"])
@@ -119,28 +141,52 @@ class Options(QWidget):
             "Exit with Star Citizen.<br>"
             "Every 5 seconds, checks to see if the game is still running."
         )
-        self.form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
+        form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
 
-        input_line_count = QSpinBox()
-        input_line_count.setMinimum(3)
-        input_line_count.setMaximum(5)
-        input_line_count.setValue(self.config_gui["main"]["line_count"])
-        input_line_count.valueChanged.connect(self.overlay_update_line_count.emit)
-        input_line_count.valueChanged.connect(self.save_line_count)
-        self.form.addRow(QLabel("Lines Shown"), input_line_count)
+        widget = QWidget()
+        widget.setLayout(form)
+        return widget
 
-        self.form.addRow(hr())
+    def create_widget_allslain_uscapi(self):
+        form = QFormLayout()
 
-        self.form.addRow(QLabel("<b>all-slain Settings</b>"))
+        input_starcitizen_api_key = QLineEdit()
+        input_starcitizen_api_key.setPlaceholderText("API Key")
+        input_starcitizen_api_key.setText(
+            self.parent().app.allslain.args.data_provider.starcitizen_api.api_key
+        )
+        input_starcitizen_api_key.textChanged.connect(self.save_starcitizen_api_key)
+
+        form.addRow("API Key " + RED_ASTERISK, input_starcitizen_api_key)
+
+        # TODO 3.11 StrEnum
+        starcitizen_api_mode_text = cast(
+            str, self.parent().app.allslain.args.data_provider.starcitizen_api.mode
+        )
+
+        input_starcitizen_api_mode = QComboBox()
+        input_starcitizen_api_mode.addItems(v.value for v in ScApiMode)
+        input_starcitizen_api_mode.setCurrentText(starcitizen_api_mode_text)
+        input_starcitizen_api_mode.currentTextChanged.connect(
+            self.save_starcitizen_api_mode
+        )
+        form.addRow("Mode " + RED_ASTERISK, input_starcitizen_api_mode)
+
+        widget = QGroupBox("Unofficial Star Citizen API")
+        widget.setLayout(form)
+        return widget
+
+    def create_widget_allslain(self):
+        form = QFormLayout()
 
         self.input_player_lookup = QCheckBox()
         self.input_player_lookup.setChecked(
             self.parent().app.allslain.args.player_lookup
         )
         self.input_player_lookup.clicked.connect(self.save_player_lookup)
-        self.form.addRow(QLabel("Display Player Org"), self.input_player_lookup)
+        form.addRow(QLabel("Display Player Org"), self.input_player_lookup)
 
-        provider = next(
+        provider: tuple[str, str] = next(
             (
                 (k, v)
                 for k, v in DATA_PROVIDERS.items()
@@ -153,7 +199,7 @@ class Options(QWidget):
         input_dataprovider.addItems(DATA_PROVIDERS.keys())
         input_dataprovider.setCurrentText(provider[0])
         input_dataprovider.currentTextChanged.connect(self.save_dataprovider_provider)
-        self.form.addRow("Data Provider " + RED_ASTERISK, input_dataprovider)
+        form.addRow("Data Provider " + RED_ASTERISK, input_dataprovider)
 
         input_use_org_theme = QCheckBox()
         input_use_org_theme.setToolTip(
@@ -164,49 +210,15 @@ class Options(QWidget):
             self.parent().app.allslain.args.data_provider.use_org_theme
         )
         input_use_org_theme.clicked.connect(self.save_org_theme)
-        self.form.addRow("Use Org Theme", input_use_org_theme)
+        form.addRow("Use Org Theme", input_use_org_theme)
 
-        self.form.addRow(hr())
-        self.scapi_layout = QFormLayout()
-        self.scapi_layout.setHorizontalSpacing(5)
-        self.form.addRow(QLabel("<b>Unofficial Star Citizen API</b>"))
+        self.widget_uscapi = self.create_widget_allslain_uscapi()
+        self.widget_uscapi.setEnabled(provider[1] == "starcitizen_api")
+        form.addRow(self.widget_uscapi)
 
-        self.input_starcitizen_api_key = QLineEdit()
-        self.input_starcitizen_api_key.setPlaceholderText("API Key")
-        self.input_starcitizen_api_key.setText(
-            self.parent().app.allslain.args.data_provider.starcitizen_api.api_key
-        )
-        self.input_starcitizen_api_key.setDisabled(provider[1] != "starcitizen_api")
-        self.input_starcitizen_api_key.textChanged.connect(
-            self.save_starcitizen_api_key
-        )
-
-        self.form.addRow("API Key " + RED_ASTERISK, self.input_starcitizen_api_key)
-
-        # TODO 3.11 StrEnum
-        starcitizen_api_mode_text = cast(
-            str, self.parent().app.allslain.args.data_provider.starcitizen_api.mode
-        )
-
-        self.input_starcitizen_api_mode = QComboBox()
-        self.input_starcitizen_api_mode.addItems(v.value for v in ScApiMode)
-        self.input_starcitizen_api_mode.setCurrentText(starcitizen_api_mode_text)
-        self.input_starcitizen_api_mode.currentTextChanged.connect(
-            self.save_starcitizen_api_mode
-        )
-        self.input_starcitizen_api_mode.setDisabled(provider[1] != "starcitizen_api")
-        self.form.addRow("Mode " + RED_ASTERISK, self.input_starcitizen_api_mode)
-
-        self.form.addItem(self.scapi_layout)
-        self.form.addRow(hr())
-
-        restart_button = QPushButton()
-        restart_button.setText("Restart")
-        restart_button.clicked.connect(self.parent().slot_reboot)
-        self.form.addRow(
-            QLabel('<span style="color: red">*</span> Requires restart'),
-            restart_button,
-        )
+        widget = QWidget()
+        widget.setLayout(form)
+        return widget
 
     def save_overlay_position(self, position: str):
         logger.debug("saving overlay position")
@@ -232,8 +244,7 @@ class Options(QWidget):
     def save_dataprovider_provider(self, text: str):
         # Requires a restart
         dp = DATA_PROVIDERS.get(text)
-        self.input_starcitizen_api_key.setDisabled(dp != "starcitizen_api")
-        self.input_starcitizen_api_mode.setDisabled(dp != "starcitizen_api")
+        self.widget_uscapi.setEnabled(dp == "starcitizen_api")
 
         # try:
         #     # This destroys the C Qt objects too?
