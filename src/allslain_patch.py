@@ -145,7 +145,11 @@ class AllSlain(QThread):
 
     def get_game_proc(self):
         return next(
-            (proc for proc in process_iter() if proc.name() == GAME_EXE),
+            (
+                proc
+                for proc in process_iter(attrs=["name", "exe"])
+                if proc.info["name"] == GAME_EXE
+            ),
             None,
         )
 
@@ -156,7 +160,7 @@ class AllSlain(QThread):
                 self.msleep(1000)
                 continue
 
-            self.args.file = str(Path(Path(proc.exe()).parent.parent, R"Game.log"))
+            self.args.file = str(Path(Path(proc.info["exe"]).parent.parent, "Game.log"))
             break
 
         self._initialized = True
