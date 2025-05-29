@@ -11,7 +11,7 @@ class Args(Config):
     debug: bool
 
 
-logging.basicConfig(format=logging.BASIC_FORMAT)
+logging.basicConfig(format="%(asctime)s:%(levelname)s:%(name)s:%(message)s")
 logger = logging.getLogger("all-slain-gui")
 
 
