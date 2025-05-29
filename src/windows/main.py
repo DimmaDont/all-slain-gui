@@ -45,9 +45,9 @@ class MainWindow(QMainWindow):
         if __debug__:
             QTimer().singleShot(250, self.init_debug)
 
-    # def slot_reboot(self):
-    #     logger.debug("Performing application reboot...")
-    #     self.app.exit(MainWindow.EXIT_CODE_REBOOT)
+    def slot_reboot(self):
+        logger.debug("Performing application reboot...")
+        self.app.exit(MainWindow.EXIT_CODE_REBOOT)
 
     def create_tray(self) -> None:
         self.menu = QMenu()

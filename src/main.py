@@ -1,17 +1,15 @@
 import sys
+from gc import collect
 
 from .app import App
 
 
 def main():
-    app = App(sys.argv)
-    sys.exit(app.exec_())
-
-    # TODO app restart "works", but the old ui doesn't get destroyed
-    # while True:
-    #     app = App(sys.argv)
-    #     exit_code = app.exec()
-    #     if exit_code != app.main_window.EXIT_CODE_REBOOT:
-    #         app.quit()
-    #         break
-    # sys.exit(exit_code)
+    while True:
+        app = App(sys.argv)
+        exit_code = app.exec_()
+        if exit_code != app.main_window.EXIT_CODE_REBOOT:
+            break
+        del app
+        collect()
+    sys.exit(exit_code)

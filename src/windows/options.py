@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QLabel,
     QLineEdit,
+    QPushButton,
     QSpinBox,
     QStyle,
     QWidget,
@@ -199,11 +200,13 @@ class Options(QWidget):
         self.form.addItem(self.scapi_layout)
         self.form.addRow(hr())
 
-        # self.restart_button = QPushButton()
-        # self.restart_button.setText("Restart")
-        # self.restart_button.clicked.connect(self.parent().slot_reboot)
-        # self.form.addRow(QLabel('<span style="color: red">*</span> Requires restart'), self.restart_button)
-        self.form.addRow(QLabel(RED_ASTERISK + " Requires restart"))
+        restart_button = QPushButton()
+        restart_button.setText("Restart")
+        restart_button.clicked.connect(self.parent().slot_reboot)
+        self.form.addRow(
+            QLabel('<span style="color: red">*</span> Requires restart'),
+            restart_button,
+        )
 
     def save_overlay_position(self, position: str):
         logger.debug("saving overlay position")
