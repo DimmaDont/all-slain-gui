@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING, cast
 from allslain.args import Args
 from allslain.colorize import Color
 from allslain.config import load_config, load_config_runtime
-from allslain.handlers.character import Character
 from allslain.handlers.handler import Handler
 from allslain.log_parser import LogParser
 from psutil import process_iter
@@ -75,16 +74,6 @@ def color2_rgb(
 
 Color.__call__ = color2__call__
 Color.rgb = color2_rgb
-
-
-def character_after(self: Character, _):
-    self.state.player_name = "You"
-
-    # Remove from handlers after use -- appears only once per log file
-    del self.state.handlers[self.name()]
-
-
-Character.after = character_after
 
 
 logger = logging.getLogger("all-slain-gui").getChild("all-slain")

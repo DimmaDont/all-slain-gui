@@ -81,7 +81,7 @@ class Options(QWidget):
         self.setWindowIcon(get_icon())
 
         screen = QApplication.primaryScreen()
-        if not screen:
+        if screen is None:
             raise RuntimeError()
         qrect = QStyle.alignedRect(
             Qt.LayoutDirection.LayoutDirectionAuto,
@@ -129,13 +129,13 @@ class Options(QWidget):
         input_line_count = QSpinBox()
         input_line_count.setMinimum(3)
         input_line_count.setMaximum(5)
-        input_line_count.setValue(self.config_gui["main"]["line_count"])
+        input_line_count.setValue(cast(int, self.config_gui["main"]["line_count"]))
         input_line_count.valueChanged.connect(self.overlay_update_line_count.emit)
         input_line_count.valueChanged.connect(self.save_line_count)
         form.addRow(QLabel("Lines Shown"), input_line_count)
 
         input_auto_exit = QCheckBox()
-        input_auto_exit.setChecked(self.config_gui["main"]["auto_exit"])
+        input_auto_exit.setChecked(cast(bool, self.config_gui["main"]["auto_exit"]))
         input_auto_exit.clicked.connect(self.save_auto_exit)
         input_auto_exit.setToolTip(
             "Exit with Star Citizen.<br>"

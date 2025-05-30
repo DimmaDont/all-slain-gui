@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     pass
 
 
-logger = logging.getLogger("all-slain-gui").getChild("tray_update")
+logger = logging.getLogger("all-slain-gui").getChild("update")
 
 
 class UpdateCheck(QThread):

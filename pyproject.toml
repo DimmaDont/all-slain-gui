@@ -53,6 +53,7 @@ profile = "black"
 check_untyped_defs = true
 files = ["."]
 strict_equality = true
+exclude = "venv/"
 
 [tool.pylint]
 ignore-paths = "venv"

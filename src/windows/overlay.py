@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import win32con
 import win32gui
@@ -38,7 +38,6 @@ class Overlay(QWidget):
             alignment |= Qt.AlignmentFlag.AlignTop
         self.set_geometry_qrect_alignment(alignment)
 
-        # Don't take up the whole width, it breaks the tray menu
         self.setWindowFlags(
             Qt.WindowType.WindowStaysOnTopHint
             | Qt.WindowType.FramelessWindowHint
@@ -81,7 +80,7 @@ class Overlay(QWidget):
                 "Waiting for Star Citizen to start...",
             ]
         )
-        for _ in range(config_gui["main"]["line_count"] - len(self.lines)):
+        for _ in range(cast(int, config_gui["main"]["line_count"]) - len(self.lines)):
             self.lines.appendleft("")
         self.text.setText("<br>".join(self.lines))
         self.text.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)

@@ -1,14 +1,9 @@
-import logging
-
 from PyQt6.QtWidgets import QApplication
 
 from .allslain_patch import AllSlain
 from .args import parse_args
 from .config import load_config, load_config_runtime
 from .windows.main import MainWindow
-
-
-logger = logging.getLogger("all-slain-gui").getChild("main")
 
 
 class App(QApplication):
