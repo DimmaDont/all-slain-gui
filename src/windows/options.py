@@ -96,7 +96,8 @@ class Options(QWidget):
 
         widget_tab = QTabWidget()
         widget_tab.addTab(self.create_widget_overlay(), "Overlay")
-        widget_tab.addTab(self.create_widget_allslain(), "all-slain")
+        widget_tab.addTab(self.create_widget_allslain(), "Log")
+        widget_tab.addTab(self.create_widget_misc(), "Misc.")
         form.addRow(widget_tab)
 
         restart_button = QPushButton()
@@ -133,23 +134,6 @@ class Options(QWidget):
         input_line_count.valueChanged.connect(self.overlay_update_line_count.emit)
         input_line_count.valueChanged.connect(self.save_line_count)
         form.addRow(QLabel("Lines Shown"), input_line_count)
-
-        input_auto_exit = QCheckBox()
-        input_auto_exit.setChecked(cast(bool, self.config_gui["main"]["auto_exit"]))
-        input_auto_exit.clicked.connect(self.save_auto_exit)
-        input_auto_exit.setToolTip(
-            "Exit with Star Citizen.<br>"
-            "Every 5 seconds, checks to see if the game is still running."
-        )
-        form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
-
-        input_check_updates = QCheckBox()
-        input_check_updates.setChecked(cast(bool, self.config_gui["main"]["check_updates"]))
-        input_check_updates.clicked.connect(self.save_check_updates)
-        input_check_updates.setToolTip("Checks for updates at startup.")
-        form.addRow(
-            QLabel("Auto Update Check " + RED_ASTERISK), input_check_updates
-        )
 
         widget = QWidget()
         widget.setLayout(form)
@@ -223,6 +207,28 @@ class Options(QWidget):
         self.widget_uscapi = self.create_widget_allslain_uscapi()
         self.widget_uscapi.setEnabled(provider[1] == "starcitizen_api")
         form.addRow(self.widget_uscapi)
+
+        widget = QWidget()
+        widget.setLayout(form)
+        return widget
+
+    def create_widget_misc(self):
+        form = QFormLayout()
+
+        input_auto_exit = QCheckBox()
+        input_auto_exit.setChecked(cast(bool, self.config_gui["main"]["auto_exit"]))
+        input_auto_exit.clicked.connect(self.save_auto_exit)
+        input_auto_exit.setToolTip(
+            "Exit with Star Citizen.<br>"
+            "Every 5 seconds, checks to see if the game is still running."
+        )
+        form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
+
+        input_check_updates = QCheckBox()
+        input_check_updates.setChecked(cast(bool, self.config_gui["main"]["check_updates"]))
+        input_check_updates.clicked.connect(self.save_check_updates)
+        input_check_updates.setToolTip("Checks for updates at startup.")
+        form.addRow(QLabel("Auto Update Check " + RED_ASTERISK), input_check_updates)
 
         widget = QWidget()
         widget.setLayout(form)
