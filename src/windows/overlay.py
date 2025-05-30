@@ -76,14 +76,17 @@ class Overlay(QWidget):
         self.lines = deque(
             [
                 '<span style="color:white;">all-slain: Star Citizen Game Log Reader</span>',
-                '<span style="color:#1050FF;">https://github.com/DimmaDont/all-slain-gui</span>',
+                '<a style="color:#1050FF; text-decoration: none;" href="https://github.com/DimmaDont/all-slain-gui">https://github.com/DimmaDont/all-slain-gui</a>',
                 "Waiting for Star Citizen to start...",
             ]
         )
         for _ in range(cast(int, config_gui["main"]["line_count"]) - len(self.lines)):
             self.lines.appendleft("")
         self.text.setText("<br>".join(self.lines))
-        self.text.setTextInteractionFlags(Qt.TextInteractionFlag.NoTextInteraction)
+        self.text.setTextInteractionFlags(
+            Qt.TextInteractionFlag.LinksAccessibleByMouse
+        )  # default
+        self.text.setOpenExternalLinks(True)
         self.text.show()
 
         layout = QVBoxLayout()
