@@ -13,6 +13,7 @@ class Config(Namespace):
     overlay_position: Literal["top", "bottom"] = "top"
     auto_exit: bool = True
     line_count: int = 4
+    check_updates: bool = True
 
 
 # fmt: off
@@ -34,6 +35,11 @@ def create_default_config() -> TOMLDocument:
     main.add(comment("Number of lines to display in the overlay"))
     main.add(comment('Default: 4'))
     main.add("line_count", Config.line_count)
+    main.add(nl())
+
+    main.add(comment("Check for updates on startup"))
+    main.add(comment('Default: true'))
+    main.add("check_updates", Config.check_updates)
     main.add(nl())
 
     doc.add("main", main)

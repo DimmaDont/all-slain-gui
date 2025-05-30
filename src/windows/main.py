@@ -82,11 +82,12 @@ class MainWindow(QMainWindow):
         self.tray.setVisible(True)
         self.tray.setContextMenu(self.menu)
 
-        self.uc = UpdateCheck()
-        self.uc.result.connect(self.enable_update_button)
-        self.uc.result.connect(self.overlay.add_message_update_available)
-        self.uc.result.connect(self.about.show_update_check_result)
-        QTimer().singleShot(250, self.uc.start)
+        if self.app.config["main"]["check_updates"]:
+            self.uc = UpdateCheck()
+            self.uc.result.connect(self.enable_update_button)
+            self.uc.result.connect(self.overlay.add_message_update_available)
+            self.uc.result.connect(self.about.show_update_check_result)
+            QTimer().singleShot(250, self.uc.start)
 
     def init_debug(self) -> None:
         logger.debug("console KeyboardInterrupt enabled")

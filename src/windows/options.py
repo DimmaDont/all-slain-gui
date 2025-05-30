@@ -143,6 +143,14 @@ class Options(QWidget):
         )
         form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
 
+        input_check_updates = QCheckBox()
+        input_check_updates.setChecked(cast(bool, self.config_gui["main"]["check_updates"]))
+        input_check_updates.clicked.connect(self.save_check_updates)
+        input_check_updates.setToolTip("Checks for updates at startup.")
+        form.addRow(
+            QLabel("Auto Update Check " + RED_ASTERISK), input_check_updates
+        )
+
         widget = QWidget()
         widget.setLayout(form)
         return widget
@@ -232,6 +240,10 @@ class Options(QWidget):
 
     def save_line_count(self, line_count: int):
         self.config_gui["main"]["line_count"] = line_count
+        save_config(self.config_gui)
+
+    def save_check_updates(self, check_updates: bool):
+        self.config_gui["main"]["check_updates"] = check_updates
         save_config(self.config_gui)
 
     def save_player_lookup(self, player_lookup: bool):
