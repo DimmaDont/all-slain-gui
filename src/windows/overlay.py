@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 
 import win32con
 import win32gui
+from allslain.version import VersionCheckResult
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
@@ -146,3 +147,10 @@ class Overlay(QWidget):
         while len(self.lines) < lines:
             self.lines.appendleft("")
         self.text.setText("<br>".join(self.lines))
+
+    def add_message_update_available(self, result: VersionCheckResult):
+        if result.error is None:
+            self.update_text(
+                f'<span style="color: cyan">An update is available:</span> '
+                f'<a style="color:#1050FF; text-decoration: none;" href="{result.url}">v{result.version}</a>'
+            )

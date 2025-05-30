@@ -83,7 +83,9 @@ class MainWindow(QMainWindow):
         self.tray.setContextMenu(self.menu)
 
         self.uc = UpdateCheck()
-        self.uc.result.connect(self.add_update_action)
+        self.uc.result.connect(self.enable_update_button)
+        self.uc.result.connect(self.overlay.add_message_update_available)
+        self.uc.result.connect(self.about.show_update_check_result)
         QTimer().singleShot(250, self.uc.start)
 
     def init_debug(self) -> None:
@@ -96,7 +98,7 @@ class MainWindow(QMainWindow):
         self.options.show()
         self.about.show()
 
-    def add_update_action(self, result: VersionCheckResult) -> None:
+    def enable_update_button(self, result: VersionCheckResult) -> None:
         if result.url:
             self.action_update.triggered.connect(
                 lambda: QDesktopServices.openUrl(QUrl(result.url))

@@ -95,7 +95,7 @@ class About(QWidget):
         self.setLayout(layout)
 
         self.uc = UpdateCheck()
-        self.uc.result.connect(self.update_check_complete)
+        self.uc.result.connect(self.show_update_check_result)
 
     def click_check_update(self) -> None:
         self.button_check_updates.setDisabled(True)
@@ -107,12 +107,11 @@ class About(QWidget):
         self.button_check_updates.setDisabled(False)
         self.update_check_result.clear()
 
-    def update_check_complete(self, result: VersionCheckResult) -> None:
-        logger.debug("update check complete")
+    def show_update_check_result(self, result: VersionCheckResult) -> None:
         if result.error:
             if result.version:
                 self.update_check_result.setText(
-                    '<span style="color: green">all-slain-gui is up to date</span>'
+                    '<span style="color: cyan">all-slain-gui is up to date</span>'
                 )
                 QTimer().singleShot(30000, self.clear_check_result)
             else:
@@ -121,5 +120,7 @@ class About(QWidget):
                 )
         else:
             self.update_check_result.setText(
-                f'<span style="color: green">Update available:</span> <a href="{result.url}">v{result.version}</a>'
+                '<span style="color: cyan">Update available:</span> '
+                f'<a href="{result.url}">v{result.version}</a>'
             )
+            self.button_check_updates.setDisabled(True)

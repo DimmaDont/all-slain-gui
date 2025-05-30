@@ -12,7 +12,7 @@ CONFIG_NAME = f"{executable_path()}/allslain_gui.conf.toml"
 class Config(Namespace):
     overlay_position: Literal["top", "bottom"] = "top"
     auto_exit: bool = True
-    line_count: int = 3
+    line_count: int = 4
 
 
 # fmt: off
@@ -32,7 +32,7 @@ def create_default_config() -> TOMLDocument:
     main.add(nl())
 
     main.add(comment("Number of lines to display in the overlay"))
-    main.add(comment('Default: 3'))
+    main.add(comment('Default: 4'))
     main.add("line_count", Config.line_count)
     main.add(nl())
 
