@@ -15,7 +15,8 @@ This program provides an overlay for the Star Citizen game log, reporting player
 
 
 ## Usage
-1. Start both the game and `allslain_gui.exe`.
+1. Start `allslain_gui.exe`.
+2. Start the game and set it to run in borderless/fullscreen.
 
 To run the script instead of the exe, see [Running the script](#running-the-script).
 
