@@ -88,6 +88,7 @@ RED_ASTERISK = '<span style="color: red">*</span>'
 
 class Options(QWidget):
     parent: Callable[[], MainWindow]
+    overlay_update_screen = Signal(str)
     overlay_update_position = Signal(str)
     overlay_update_line_count = Signal(int)
 
@@ -135,6 +136,13 @@ class Options(QWidget):
 
     def create_widget_overlay(self):
         form = QFormLayout()
+
+        input_overlay_screen = QComboBox()
+        input_overlay_screen.addItems(s.name() for s in QApplication.screens())
+        input_overlay_screen.setCurrentText(self.config_gui["main"]["screen"])
+        input_overlay_screen.currentTextChanged.connect(self.overlay_update_screen.emit)
+        input_overlay_screen.currentTextChanged.connect(self.save_overlay_screen)
+        form.addRow(QLabel("Monitor"), input_overlay_screen)
 
         overlay_pos = next(
             (
@@ -276,6 +284,11 @@ class Options(QWidget):
         widget = QWidget()
         widget.setLayout(form)
         return widget
+
+    def save_overlay_screen(self, screen: str):
+        logger.debug("saving overlay screen")
+        self.config_gui["main"]["screen"] = screen
+        save_config(self.config_gui)
 
     def save_overlay_position(self, position: str):
         logger.debug("saving overlay position")

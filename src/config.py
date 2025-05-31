@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from typing import TypedDict
 
     class ConfigMain(TypedDict):
+        screen: str
         overlay_position: OverlayPosition
         auto_exit: bool
         line_count: int
@@ -30,6 +31,7 @@ else:
 
 
 class Config(Namespace):
+    screen: str = ""
     overlay_position: OverlayPosition = "top"
     auto_exit: bool = True
     line_count: int = 4
@@ -41,6 +43,10 @@ def create_default_config() -> TOMLDocument:
     doc = document()
 
     main = table()
+
+    main.add(comment("Which monitor the overlay is displayed on."))
+    main.add("screen", Config.screen)
+    main.add(nl())
 
     main.add(comment("Whether the overlay should be on the top left of the screen or the bottom left."))
     main.add(comment('Default: "top"'))

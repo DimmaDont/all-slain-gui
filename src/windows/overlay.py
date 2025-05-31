@@ -30,14 +30,14 @@ class Overlay(QWidget):
     def __init__(self, mw: MainWindow):
         super().__init__(mw)
 
-        config_gui = mw.options.parent().app.config
+        self.config_gui = mw.options.parent().app.config
 
-        alignment = Qt.AlignmentFlag.AlignLeft
-        if config_gui["main"]["overlay_position"] == "bottom":
-            alignment |= Qt.AlignmentFlag.AlignBottom
+        self.alignment = Qt.AlignmentFlag.AlignLeft
+        if self.config_gui["main"]["overlay_position"] == "bottom":
+            self.alignment |= Qt.AlignmentFlag.AlignBottom
         else:
-            alignment |= Qt.AlignmentFlag.AlignTop
-        self.set_geometry_qrect_alignment(alignment)
+            self.alignment |= Qt.AlignmentFlag.AlignTop
+        self.set_screen()
 
         self.setWindowFlags(
             Qt.WindowType.WindowStaysOnTopHint
@@ -47,7 +47,7 @@ class Overlay(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.text = QLabel(self)
-        if config_gui["main"]["overlay_position"] == "bottom":
+        if self.config_gui["main"]["overlay_position"] == "bottom":
             self.text.setAlignment(
                 Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
             )
@@ -81,7 +81,7 @@ class Overlay(QWidget):
                 "Waiting for Star Citizen to start...",
             ]
         )
-        for _ in range(config_gui["main"]["line_count"] - len(self.lines)):
+        for _ in range(self.config_gui["main"]["line_count"] - len(self.lines)):
             self.lines.appendleft("")
         self.text.setText("<br>".join(self.lines))
         self.text.setTextInteractionFlags(
@@ -109,37 +109,33 @@ class Overlay(QWidget):
 
     def update_position(self, pos_name: str):
         logger.debug(f"overlay pos {pos_name}")
-        alignment = Qt.AlignmentFlag.AlignLeft
-        alignment |= (
+        self.alignment = Qt.AlignmentFlag.AlignLeft
+        self.alignment |= (
             Qt.AlignmentFlag.AlignBottom
             if pos_name == "Bottom Left"
             else Qt.AlignmentFlag.AlignTop
         )
+        self.text.setAlignment(self.alignment)
+        self.set_screen()
 
-        if pos_name == "Bottom Left":
-            self.text.setAlignment(
-                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignBottom
-            )
-        else:
-            self.text.setAlignment(
-                Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop
-            )
-        self.set_geometry_qrect_alignment(alignment)
-
-    def set_geometry_qrect_alignment(self, alignment):
-        screen = QApplication.primaryScreen()
-        if not screen:
+    def set_screen(self, screen_name: str | None = None):
+        screen_name = screen_name or self.config_gui["main"]["screen"]
+        screen = next(
+            (s for s in QApplication.screens() if s.name() == screen_name),
+            QApplication.primaryScreen(),
+        )
+        if screen is None:
             raise RuntimeError()
         geometry = screen.geometry()
         qrect = QStyle.alignedRect(
             Qt.LayoutDirection.LeftToRight,
-            alignment,
+            self.alignment,
             QSize(int(geometry.width() * 0.66), 100),
             geometry,
         )
         self.setGeometry(qrect)
         if layout := self.layout():
-            layout.setAlignment(alignment)
+            layout.setAlignment(self.alignment)
 
     def update_line_count(self, lines: int):
         while len(self.lines) > lines:
