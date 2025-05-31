@@ -74,7 +74,6 @@ class About(QWidget):
             "<br>"
             '<a href="https://github.com/DimmaDont/all-slain">https://github.com/DimmaDont/all-slain</a>'
         )
-        links.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
         links.setOpenExternalLinks(True)
         layout.addWidget(links)
 
@@ -86,9 +85,6 @@ class About(QWidget):
         self.update_check_result = QLabel()
         self.update_check_result.setStyleSheet("min-height: 40px; max-width: 260px;")
         self.update_check_result.setWordWrap(True)
-        self.update_check_result.setTextInteractionFlags(
-            Qt.TextInteractionFlag.TextBrowserInteraction
-        )
         self.update_check_result.setOpenExternalLinks(True)
         layout.addWidget(self.update_check_result)
 
