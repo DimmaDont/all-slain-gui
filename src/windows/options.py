@@ -28,7 +28,7 @@ from ..functions import get_icon
 
 
 if TYPE_CHECKING:
-    from src.app import MainWindow
+    from ..app import MainWindow
 
 
 logger = logging.getLogger("all-slain-gui").getChild("options")
@@ -77,7 +77,7 @@ def hr() -> QFrame:
     return _hr
 
 
-def QLabelDisabled(text: str) -> QLabel:
+def QLabelDisabled(text: str) -> QLabel:  # pylint: disable=invalid-name
     ql = QLabel(text)
     ql.setDisabled(True)
     return ql

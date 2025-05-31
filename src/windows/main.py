@@ -5,18 +5,19 @@ from typing import TYPE_CHECKING
 
 from allslain.version import VersionCheckResult
 from PyQt6.QtCore import QTimer, QUrl
-from PyQt6.QtGui import QAction, QDesktopServices
-from PyQt6.QtWidgets import QLabel, QMainWindow, QMenu, QSystemTrayIcon, QWidgetAction
+from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtWidgets import QMainWindow
 
-from src.functions import get_icon
-from src.update import UpdateCheck
-from src.windows.about import About
-from src.windows.options import Options
-from src.windows.overlay import Overlay
+from ..update import UpdateCheck
+from .about import About
+from .options import Options
+from .overlay import Overlay
+from .tray_icon import TrayIcon
 
 
 if TYPE_CHECKING:
     from ..app import App
+
 
 logger = logging.getLogger("all-slain-gui").getChild("main")
 
@@ -28,6 +29,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.app = app
 
+        self.about = About(self)
         self.options = Options(self)
 
         self.overlay = Overlay(self)
@@ -39,9 +41,7 @@ class MainWindow(QMainWindow):
 
         self.app.allslain.output.connect(self.overlay.update_text)
 
-        self.about = About(self)
-
-        self.create_tray()
+        self.tray_icon = TrayIcon(self)
 
         if __debug__:
             QTimer().singleShot(250, self.init_debug)
@@ -57,39 +57,6 @@ class MainWindow(QMainWindow):
         logger.debug("Performing application reboot...")
         self.app.exit(MainWindow.EXIT_CODE_REBOOT)
 
-    def create_tray(self) -> None:
-        self.menu = QMenu()
-        self.menu.setStyleSheet("border-radius: 5px")
-
-        self.action_update = QWidgetAction(self.menu)
-        label = QLabel("Update!")  # Emojis in labels are sloooow
-        label.setStyleSheet(
-            "QLabel {background-color: #00A030; padding: 3px; padding-left: 32px; border-radius: 4px; margin: 2px;}"
-            "QLabel:hover { background-color: #008030;} "
-        )
-        self.action_update.setDefaultWidget(label)
-        self.action_update.setVisible(False)
-        self.menu.addAction(self.action_update)
-
-        self.action_options = QAction("Options")
-        self.action_options.triggered.connect(self.options.show)
-        self.menu.addAction(self.action_options)
-
-        self.action_about = QAction("About")
-        self.action_about.triggered.connect(self.about.show)
-        self.menu.addAction(self.action_about)
-
-        self.quit_sep = self.menu.addSeparator()
-
-        self.action_quit = QAction("Exit")
-        self.action_quit.triggered.connect(self.app.exit)
-        self.menu.addAction(self.action_quit)
-
-        self.tray = QSystemTrayIcon()
-        self.tray.setIcon(get_icon())
-        self.tray.setVisible(True)
-        self.tray.setContextMenu(self.menu)
-
     def init_debug(self) -> None:
         logger.debug("console KeyboardInterrupt enabled")
 
@@ -102,7 +69,7 @@ class MainWindow(QMainWindow):
 
     def enable_update_button(self, result: VersionCheckResult) -> None:
         if result.url:
-            self.action_update.triggered.connect(
+            self.tray_icon.action_update.triggered.connect(
                 lambda: QDesktopServices.openUrl(QUrl(result.url))
             )
-            self.action_update.setVisible(True)
+            self.tray_icon.action_update.setVisible(True)
