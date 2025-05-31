@@ -45,6 +45,13 @@ class MainWindow(QMainWindow):
         if __debug__:
             QTimer().singleShot(250, self.init_debug)
 
+        if self.app.config["main"]["check_updates"]:
+            self.uc = UpdateCheck()
+            self.uc.result.connect(self.enable_update_button)
+            self.uc.result.connect(self.overlay.add_message_update_available)
+            self.uc.result.connect(self.about.show_update_check_result)
+            QTimer().singleShot(250, self.uc.start)
+
     def slot_reboot(self):
         logger.debug("Performing application reboot...")
         self.app.exit(MainWindow.EXIT_CODE_REBOOT)
@@ -81,13 +88,6 @@ class MainWindow(QMainWindow):
         self.tray.setIcon(get_icon())
         self.tray.setVisible(True)
         self.tray.setContextMenu(self.menu)
-
-        if self.app.config["main"]["check_updates"]:
-            self.uc = UpdateCheck()
-            self.uc.result.connect(self.enable_update_button)
-            self.uc.result.connect(self.overlay.add_message_update_available)
-            self.uc.result.connect(self.about.show_update_check_result)
-            QTimer().singleShot(250, self.uc.start)
 
     def init_debug(self) -> None:
         logger.debug("console KeyboardInterrupt enabled")
