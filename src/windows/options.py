@@ -41,8 +41,27 @@ DATA_PROVIDERS = {
     "Wild Knight Squadron's NAVCOM API": "wks_navcom",
 }
 
+DATA_PROVIDERS_HELPTEXT = {
+    "": "No data provider selected.",
+    "rsi": "Roberts Space Industries",
+    "starcitizen_api": "Unofficial Star Citizen API<br><b>Requires an API key!</b>",
+    "wks_navcom": "Wild Knight Squadron's NAVCOM API",
+}
+
+DATA_PROVIDERS_HELPTEXTLINK = {
+    "": "",
+    "rsi": '<a href="https://robertsspaceindustries.com/">https://robertsspaceindustries.com/</a>',
+    "starcitizen_api": '<a href="https://starcitizen-api.com/">https://starcitizen-api.com/</a>',
+    "wks_navcom": '<a href="https://sentry.wildknightsquadron.com/">https://sentry.wildknightsquadron.com/</a>',
+}
+
+
 if __debug__:
     DATA_PROVIDERS["Dummy"] = "dummy"
+    DATA_PROVIDERS_HELPTEXT["dummy"] = "aeiou"
+    DATA_PROVIDERS_HELPTEXTLINK["dummy"] = (
+        '<a href="https://example.com/">https://example.com/</a>'
+    )
 
 
 OVERLAY_POSITIONS = {
@@ -56,6 +75,12 @@ def hr() -> QFrame:
     _hr.setFrameShape(QFrame.Shape.HLine)
     _hr.setFrameShadow(QFrame.Shadow.Sunken)
     return _hr
+
+
+def QLabelDisabled(text: str) -> QLabel:
+    ql = QLabel(text)
+    ql.setDisabled(True)
+    return ql
 
 
 RED_ASTERISK = '<span style="color: red">*</span>'
@@ -177,6 +202,12 @@ class Options(QWidget):
         )
         self.input_player_lookup.clicked.connect(self.save_player_lookup)
         form.addRow(QLabel("Display Player Org"), self.input_player_lookup)
+        form.addRow(
+            QLabelDisabled(
+                "Whether to perform player org lookups. If checked, select a data provider below."
+            )
+        )
+        form.addRow(hr())
 
         provider: tuple[str, str] = next(
             (
@@ -192,17 +223,30 @@ class Options(QWidget):
         input_dataprovider.setCurrentText(provider[0])
         input_dataprovider.currentTextChanged.connect(self.save_dataprovider_provider)
         form.addRow("Data Provider " + RED_ASTERISK, input_dataprovider)
+        self.label_dataprovider = QLabelDisabled(
+            DATA_PROVIDERS_HELPTEXT.get(provider[1], provider[0])
+        )
+        form.addRow(self.label_dataprovider)
+        self.label_dataprovider_link = QLabel(
+            DATA_PROVIDERS_HELPTEXTLINK.get(provider[1], provider[0])
+        )
+        self.label_dataprovider_link.setOpenExternalLinks(True)
+        form.addRow(self.label_dataprovider_link)
+        form.addRow(hr())
 
         input_use_org_theme = QCheckBox()
-        input_use_org_theme.setToolTip(
-            "Whether to pull and display the org's Spectrum theme color when displaying an org.<br>"
-            "Currently only available with the <b><code>RSI</code></b> data provider."
-        )
         input_use_org_theme.setChecked(
             self.parent().app.allslain.args.data_provider.use_org_theme
         )
         input_use_org_theme.clicked.connect(self.save_org_theme)
         form.addRow("Use Org Theme", input_use_org_theme)
+        form.addRow(
+            QLabelDisabled(
+                "Whether to display the org's theme color from Spectrum.<br>"
+                "Currently only available with the <b>Roberts Space Industries</b> data provider."
+            )
+        )
+        form.addRow(hr())
 
         self.widget_uscapi = self.create_widget_allslain_uscapi()
         self.widget_uscapi.setEnabled(provider[1] == "starcitizen_api")
@@ -218,17 +262,16 @@ class Options(QWidget):
         input_auto_exit = QCheckBox()
         input_auto_exit.setChecked(self.config_gui["main"]["auto_exit"])
         input_auto_exit.clicked.connect(self.save_auto_exit)
-        input_auto_exit.setToolTip(
-            "Exit with Star Citizen.<br>"
-            "Every 5 seconds, checks to see if the game is still running."
-        )
         form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
+        form.addRow(QLabelDisabled("Exit when Star Citizen does."))
+        form.addRow(hr())
 
         input_check_updates = QCheckBox()
         input_check_updates.setChecked(self.config_gui["main"]["check_updates"])
         input_check_updates.clicked.connect(self.save_check_updates)
-        input_check_updates.setToolTip("Checks for updates at startup.")
         form.addRow(QLabel("Auto Update Check " + RED_ASTERISK), input_check_updates)
+        form.addRow(QLabelDisabled("Checks for updates at startup."))
+        form.addRow(hr())
 
         widget = QWidget()
         widget.setLayout(form)
@@ -270,6 +313,9 @@ class Options(QWidget):
         #     # self._layout.removeRow(self.input_starcitizen_api_mode)
         # except AttributeError:
         #     pass
+
+        self.label_dataprovider.setText(DATA_PROVIDERS_HELPTEXT.get(dp))
+        self.label_dataprovider_link.setText(DATA_PROVIDERS_HELPTEXTLINK.get(dp))
 
         self.config_als["data_provider"]["provider"] = dp
         save_config_allslain(self.config_als)
