@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from collections import deque
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 import win32con
 import win32gui
@@ -81,7 +81,7 @@ class Overlay(QWidget):
                 "Waiting for Star Citizen to start...",
             ]
         )
-        for _ in range(cast(int, config_gui["main"]["line_count"]) - len(self.lines)):
+        for _ in range(config_gui["main"]["line_count"] - len(self.lines)):
             self.lines.appendleft("")
         self.text.setText("<br>".join(self.lines))
         self.text.setTextInteractionFlags(

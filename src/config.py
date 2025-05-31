@@ -1,6 +1,6 @@
 import os
 from argparse import Namespace
-from typing import Literal, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from allslain.config import TOMLFile, executable_path, merge, mergeattr
 from tomlkit import TOMLDocument, comment, document, nl, table
@@ -9,8 +9,28 @@ from tomlkit import TOMLDocument, comment, document, nl, table
 CONFIG_NAME = f"{executable_path()}/allslain_gui.conf.toml"
 
 
+OverlayPosition = Literal["top", "bottom"]
+
+
+if TYPE_CHECKING:
+    from typing import TypedDict
+
+    class ConfigMain(TypedDict):
+        overlay_position: OverlayPosition
+        auto_exit: bool
+        line_count: int
+        check_updates: bool
+
+    # Not allowed, but it works™
+    class ConfigDocument(TOMLDocument, TypedDict):  # type: ignore
+        main: ConfigMain
+
+else:
+    ConfigDocument = TOMLDocument
+
+
 class Config(Namespace):
-    overlay_position: Literal["top", "bottom"] = "top"
+    overlay_position: OverlayPosition = "top"
     auto_exit: bool = True
     line_count: int = 4
     check_updates: bool = True
@@ -48,7 +68,7 @@ def create_default_config() -> TOMLDocument:
 # fmt: on
 
 
-def load_config() -> TOMLDocument:
+def load_config() -> ConfigDocument:
     # Load defaults and config file
     config = create_default_config()
     if os.path.exists(CONFIG_NAME):
@@ -60,11 +80,11 @@ def load_config() -> TOMLDocument:
 
     TOMLFile(CONFIG_NAME).write_if_modified(config, _config)
 
-    return config
+    return cast(ConfigDocument, config)
 
 
 def load_config_runtime(namespace: Namespace | None = None) -> Config:
-    config = load_config()
+    config = cast(TOMLDocument, load_config())
     if not namespace:
         namespace = Config()
     mergeattr(config.pop("main"), namespace)
@@ -73,5 +93,5 @@ def load_config_runtime(namespace: Namespace | None = None) -> Config:
     return cast(Config, namespace)
 
 
-def save_config(config: TOMLDocument) -> None:
-    TOMLFile(CONFIG_NAME).write(config.as_string())
+def save_config(config: ConfigDocument) -> None:
+    TOMLFile(CONFIG_NAME).write(cast(TOMLDocument, config).as_string())

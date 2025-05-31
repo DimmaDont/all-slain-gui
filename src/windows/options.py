@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable, cast
 
-from allslain.config import save_config as save_config_allslain
 from allslain.data_providers.starcitizen_api import Mode as ScApiMode
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtCore import pyqtSignal as Signal
@@ -23,7 +22,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from ..config import save_config
+from ..allslain_patch import save_config as save_config_allslain
+from ..config import OverlayPosition, save_config
 from ..functions import get_icon
 
 
@@ -130,7 +130,7 @@ class Options(QWidget):
         input_line_count = QSpinBox()
         input_line_count.setMinimum(3)
         input_line_count.setMaximum(5)
-        input_line_count.setValue(cast(int, self.config_gui["main"]["line_count"]))
+        input_line_count.setValue(self.config_gui["main"]["line_count"])
         input_line_count.valueChanged.connect(self.overlay_update_line_count.emit)
         input_line_count.valueChanged.connect(self.save_line_count)
         form.addRow(QLabel("Lines Shown"), input_line_count)
@@ -216,7 +216,7 @@ class Options(QWidget):
         form = QFormLayout()
 
         input_auto_exit = QCheckBox()
-        input_auto_exit.setChecked(cast(bool, self.config_gui["main"]["auto_exit"]))
+        input_auto_exit.setChecked(self.config_gui["main"]["auto_exit"])
         input_auto_exit.clicked.connect(self.save_auto_exit)
         input_auto_exit.setToolTip(
             "Exit with Star Citizen.<br>"
@@ -225,7 +225,7 @@ class Options(QWidget):
         form.addRow(QLabel("Auto Exit " + RED_ASTERISK), input_auto_exit)
 
         input_check_updates = QCheckBox()
-        input_check_updates.setChecked(cast(bool, self.config_gui["main"]["check_updates"]))
+        input_check_updates.setChecked(self.config_gui["main"]["check_updates"])
         input_check_updates.clicked.connect(self.save_check_updates)
         input_check_updates.setToolTip("Checks for updates at startup.")
         form.addRow(QLabel("Auto Update Check " + RED_ASTERISK), input_check_updates)
@@ -236,7 +236,7 @@ class Options(QWidget):
 
     def save_overlay_position(self, position: str):
         logger.debug("saving overlay position")
-        pos = OVERLAY_POSITIONS.get(position)
+        pos = cast(OverlayPosition, OVERLAY_POSITIONS.get(position))
         self.config_gui["main"]["overlay_position"] = pos
         save_config(self.config_gui)
 
@@ -261,7 +261,7 @@ class Options(QWidget):
 
     def save_dataprovider_provider(self, text: str):
         # Requires a restart
-        dp = DATA_PROVIDERS.get(text)
+        dp = DATA_PROVIDERS.get(text, text)
         self.widget_uscapi.setEnabled(dp == "starcitizen_api")
 
         # try:
@@ -286,5 +286,7 @@ class Options(QWidget):
 
     def save_starcitizen_api_mode(self, mode_text: str):
         logger.debug("saving scapi mode")
-        self.config_als["data_provider"]["starcitizen_api"]["mode"] = mode_text.lower()
+        self.config_als["data_provider"]["starcitizen_api"]["mode"] = ScApiMode[
+            mode_text.upper()
+        ]
         save_config_allslain(self.config_als)

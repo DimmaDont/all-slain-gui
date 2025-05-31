@@ -16,15 +16,46 @@ from typing import TYPE_CHECKING, cast
 from allslain.args import Args
 from allslain.colorize import Color
 from allslain.config import load_config, load_config_runtime
+from allslain.config import save_config as _save_config
+from allslain.data_providers.starcitizen_api import Mode
 from allslain.handlers.handler import Handler
 from allslain.log_parser import LogParser
 from psutil import process_iter
 from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal as Signal
+from tomlkit import TOMLDocument
 
 
 if TYPE_CHECKING:
+    from typing import TypedDict
+
     from .args import Args as GuiArgs
+
+    class StarCitizenApi(TypedDict):
+        api_key: str
+        mode: Mode
+
+    class DataProvider(TypedDict):
+        provider: str
+        use_org_theme: bool
+
+        starcitizen_api: StarCitizenApi
+
+    class AlsConfigMain(TypedDict):
+        player_lookup: bool
+        planespotting: bool
+
+    class ConfigDocument(TOMLDocument, TypedDict):  # type: ignore
+        main: AlsConfigMain
+        data_provider: DataProvider
+
+else:
+    ConfigDocument = TOMLDocument
+
+
+def save_config(config: ConfigDocument) -> None:
+    _save_config(cast(TOMLDocument, config))
+
 
 COLOR_MAP = {
     "BLACK": "#0C0C0C",
@@ -127,7 +158,7 @@ class AllSlain(QThread):
         _self.args.file = None
         _self.args.replay = False
 
-        _self.config = load_config()
+        _self.config = cast(ConfigDocument, load_config())
 
     def stopping(self):
         self._stopping = True
