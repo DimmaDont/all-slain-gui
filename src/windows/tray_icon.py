@@ -52,3 +52,10 @@ class TrayIcon(QSystemTrayIcon):
         self.setIcon(get_icon())
         self.setVisible(True)
         self.setContextMenu(self.menu)
+        self.activated.connect(self.activate)
+
+    def activate(self, reason: QSystemTrayIcon.ActivationReason):
+        if reason == QSystemTrayIcon.ActivationReason.Trigger:
+            cm = self.contextMenu()
+            if cm:
+                cm.popup(cm.cursor().pos())
