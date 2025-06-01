@@ -68,7 +68,7 @@ class MainWindow(QMainWindow):
         self.about.show()
 
     def enable_update_button(self, result: VersionCheckResult) -> None:
-        if result.url:
+        if result.error is None:
             self.tray_icon.action_update.triggered.connect(
                 lambda: QDesktopServices.openUrl(QUrl(result.url))
             )
