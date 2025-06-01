@@ -12,7 +12,7 @@ license-files = ["LICENSE"]
 
 dependencies = [
     "allslain @ git+https://github.com/DimmaDont/all-slain",
-    "bs4",
+    "beautifulsoup4",
     "psutil",
     "pyqt6",
     "pywin32",
