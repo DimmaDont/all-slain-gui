@@ -1,8 +1,5 @@
 name: Build
-on:
-  push:
-    branches:
-      - 'master'
+on: push
 jobs:
   build:
     name: Build
@@ -18,4 +15,4 @@ jobs:
       output: dist/allslain_gui.exe
       attest: false
       release: true
-      tag_name: latest
+      tag_name: ${{ github.ref_name == 'master' && 'latest' || github.ref_name }}
