@@ -124,6 +124,8 @@ class Options(QWidget):
         widget_tab.addTab(self.create_widget_overlay(), "Overlay")
         widget_tab.addTab(self.create_widget_allslain(), "Log")
         widget_tab.addTab(self.create_widget_misc(), "Misc.")
+        if __debug__:
+            widget_tab.addTab(self.create_widget_debug(), "Debug")
         form.addRow(widget_tab)
 
         restart_button = QPushButton()
@@ -280,6 +282,16 @@ class Options(QWidget):
         form.addRow(QLabel("Auto Update Check " + RED_ASTERISK), input_check_updates)
         form.addRow(QLabelDisabled("Checks for updates at startup."))
         form.addRow(hr())
+
+        widget = QWidget()
+        widget.setLayout(form)
+        return widget
+
+    def create_widget_debug(self):
+        if not __debug__:
+            return None
+
+        form = QFormLayout()
 
         widget = QWidget()
         widget.setLayout(form)
