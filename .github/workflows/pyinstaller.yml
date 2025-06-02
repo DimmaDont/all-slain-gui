@@ -73,6 +73,7 @@ jobs:
           --add-data icon:icon
           --exclude-module pkg_resources
           --optimize 2
+          --version version.rc
       - name: Attest
         id: attest
         uses: actions/attest-build-provenance@v2
