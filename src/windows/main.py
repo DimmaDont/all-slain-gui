@@ -3,9 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from allslain.version import VersionCheckResult
-from PyQt6.QtCore import QTimer, QUrl
-from PyQt6.QtGui import QDesktopServices
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QMainWindow
 
 from ..update import UpdateCheck
@@ -48,7 +46,7 @@ class MainWindow(QMainWindow):
 
         if self.app.config["main"]["check_updates"]:
             self.uc = UpdateCheck()
-            self.uc.result.connect(self.enable_update_button)
+            self.uc.result.connect(self.tray_icon.enable_update_button)
             self.uc.result.connect(self.overlay.add_message_update_available)
             self.uc.result.connect(self.about.show_update_check_result)
             QTimer().singleShot(250, self.uc.start)
@@ -66,10 +64,3 @@ class MainWindow(QMainWindow):
 
         self.options.show()
         self.about.show()
-
-    def enable_update_button(self, result: VersionCheckResult) -> None:
-        if result.error is None:
-            self.tray_icon.action_update.triggered.connect(
-                lambda: QDesktopServices.openUrl(QUrl(result.url))
-            )
-            self.tray_icon.action_update.setVisible(True)

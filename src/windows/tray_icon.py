@@ -3,7 +3,9 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Callable
 
-from PyQt6.QtGui import QAction
+from allslain.version import VersionCheckResult
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QAction, QDesktopServices
 from PyQt6.QtWidgets import QLabel, QMenu, QSystemTrayIcon, QWidgetAction
 
 from ..functions import get_icon
@@ -59,3 +61,12 @@ class TrayIcon(QSystemTrayIcon):
             cm = self.contextMenu()
             if cm:
                 cm.popup(cm.cursor().pos())
+
+    def enable_update_button(self, result: VersionCheckResult) -> None:
+        if result.error is None:
+            self.action_update.triggered.disconnect()
+            self.action_update.triggered.connect(
+                lambda: QDesktopServices.openUrl(QUrl(result.url))
+            )
+        # Breaks when setting invisible
+        self.action_update.setVisible(result.error is None)
