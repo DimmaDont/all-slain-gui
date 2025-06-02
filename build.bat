@@ -7,4 +7,5 @@ pyinstaller ^
     --debug noarchive ^
     --add-data icon:icon ^
     --exclude-module pkg_resources ^
-    --optimize 2
+    --optimize 2 ^
+    --version version.rc
