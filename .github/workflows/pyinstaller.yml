@@ -62,6 +62,14 @@ jobs:
           cache: pip
       - name: Install Dependencies
         run: pip install -e .[build_app]
+      - name: Remove unused Qt files
+        run: |
+          mv $pythonLocation/lib/site-packages/PyQt6/Qt6/bin $pythonLocation/lib/site-packages/PyQt6/Qt6/bin_
+          mkdir $pythonLocation/lib/site-packages/PyQt6/Qt6/bin
+          mv $pythonLocation/lib/site-packages/PyQt6/Qt6/bin_/Qt6Core.dll $pythonLocation/lib/site-packages/PyQt6/Qt6/bin
+          mv $pythonLocation/lib/site-packages/PyQt6/Qt6/bin_/Qt6Widgets.dll $pythonLocation/lib/site-packages/PyQt6/Qt6/bin
+          mv $pythonLocation/lib/site-packages/PyQt6/Qt6/bin_/Qt6Gui.dll $pythonLocation/lib/site-packages/PyQt6/Qt6/bin
+          mv $pythonLocation/lib/site-packages/PyQt6/Qt6/translations $pythonLocation/lib/site-packages/PyQt6/Qt6/translations_
       - name: Package Application
         run: >-
           pyinstaller
