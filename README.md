@@ -14,9 +14,16 @@ This program provides an overlay for the Star Citizen game log, reporting player
 ![screenshot of game overlay](https://github.com/user-attachments/assets/05419d8b-a686-41d2-bced-04ca9384011a)
 
 
+# Features
+* Cool overlay
+* Automatic org lookup
+* Discord webhook integration
+
+
 ## Usage
 1. Start `allslain_gui.exe`.
 2. Start the game and set it to run in borderless/fullscreen.
+3. For program settings and other things, check the Windows taskbar tray.
 
 To run the script instead of the exe, see [Running the script](#running-the-script).
 
