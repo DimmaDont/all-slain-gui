@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import datetime
 import logging
+from enum import IntEnum, auto
 from io import TextIOWrapper
 from pathlib import Path
 from struct import pack
@@ -19,11 +20,16 @@ from allslain.config import load_config, load_config_runtime
 from allslain.config import save_config as _save_config
 from allslain.data_providers.starcitizen_api import Mode
 from allslain.handlers.handler import Handler
+from allslain.handlers.killp import KillP
+from allslain.handlers.killv import KillV
 from allslain.log_parser import LogParser
 from psutil import process_iter
 from PyQt6.QtCore import QThread
 from PyQt6.QtCore import pyqtSignal as Signal
 from tomlkit import TOMLDocument
+
+from .config import ConfigDocument as GuiConfig
+from .discord import post_webhook
 
 
 if TYPE_CHECKING:
@@ -79,8 +85,6 @@ COLOR_MAP_BOLD = {
     "WHITE": "#F2F2F2",
 }
 
-ColorTerminal = Color
-
 
 GAME_EXE = "StarCitizen.exe" if not __debug__ else "mpv.exe"
 
@@ -103,8 +107,25 @@ def color2_rgb(
     return f'<span style="color: #{pack("BBB", *fg).hex()}">{text.replace(" ", "&nbsp;")}</span>'
 
 
-Color.__call__ = color2__call__
-Color.rgb = color2_rgb
+color_call_orig = Color.__call__
+color_rgb_orig = Color.rgb
+
+
+class OutputType(IntEnum):
+    ANSI = auto()
+    HTML = auto()
+
+    def __call__(self):
+        match self:
+            case OutputType.ANSI:
+                Color.__call__ = color_call_orig
+                Color.rgb = color_rgb_orig
+            case OutputType.HTML:
+                Color.__call__ = color2__call__
+                Color.rgb = color2_rgb
+
+
+OutputType.HTML()
 
 
 logger = logging.getLogger("all-slain-gui").getChild("all-slain")
@@ -114,7 +135,7 @@ class AllSlain(QThread):
     output = Signal(object)
     game_exit = Signal()
 
-    def __init__(_self, gui_args: GuiArgs):
+    def __init__(_self, gui_args: GuiArgs, gui_config: GuiConfig):
         super().__init__()
         _self.setObjectName("AllSlain")
         _self._initialized = False
@@ -159,6 +180,41 @@ class AllSlain(QThread):
         _self.args.replay = False
 
         _self.config = cast(ConfigDocument, load_config())
+
+        if (
+            gui_config["discord"]["webhook1_enabled"]
+            and gui_config["discord"]["webhook1_info"]["url"]
+            and gui_config["discord"]["webhook1_info"].get("name") is not None
+        ):
+
+            def handler_call_discord(self: Handler, data):
+                if text := self.format(data):
+                    self.output(text)
+                self.after(data)
+
+                time_delta = abs(
+                    (
+                        datetime.datetime.now()
+                        - datetime.datetime.fromisoformat(self.state.curr_event_timestr)
+                    ).total_seconds()
+                )
+                if (
+                    text
+                    and self.state.player_name
+                    and self.state.player_name in text
+                    and time_delta < 2  # 2sec in either direction, 4s window
+                ):
+                    OutputType.ANSI()  # 😵‍💫
+                    ansi_text = self.format(data)
+                    OutputType.HTML()
+
+                    if ansi_text:
+                        post_webhook(
+                            gui_config["discord"]["webhook1_info"]["url"], ansi_text
+                        )
+
+            KillP.__call__ = handler_call_discord
+            KillV.__call__ = handler_call_discord
 
     def stopping(self):
         self._stopping = True

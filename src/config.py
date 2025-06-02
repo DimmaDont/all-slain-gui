@@ -1,6 +1,6 @@
 import os
 from argparse import Namespace
-from typing import TYPE_CHECKING, Literal, cast
+from typing import TYPE_CHECKING, Any, Literal, NotRequired, TypedDict, cast
 
 from allslain.config import TOMLFile, executable_path, merge, mergeattr
 from tomlkit import TOMLDocument, comment, document, nl, table
@@ -12,8 +12,23 @@ CONFIG_NAME = f"{executable_path()}/allslain_gui.conf.toml"
 OverlayPosition = Literal["top", "bottom"]
 
 
+class DiscordWebhook(TypedDict):
+    application_id: NotRequired[Any]
+    avatar: NotRequired[Any]
+    channel_id: NotRequired[str]
+    guild_id: NotRequired[str]
+    id: NotRequired[str]
+    name: NotRequired[str]
+    type: NotRequired[int]
+    token: NotRequired[str]
+    url: str
+
+
 if TYPE_CHECKING:
-    from typing import TypedDict
+
+    class ConfigDiscord(TypedDict):
+        webhook1_enabled: bool
+        webhook1_info: DiscordWebhook
 
     class ConfigMain(TypedDict):
         screen: str
@@ -25,6 +40,7 @@ if TYPE_CHECKING:
     # Not allowed, but it works™
     class ConfigDocument(TOMLDocument, TypedDict):  # type: ignore
         main: ConfigMain
+        discord: ConfigDiscord
 
 else:
     ConfigDocument = TOMLDocument
@@ -70,8 +86,26 @@ def create_default_config() -> TOMLDocument:
 
     doc.add("main", main)
 
+    discord = table()
+
+    discord.add("webhook1_enabled", False)
+    discord.add("webhook1_info", {"url": ""})
+    discord.add(nl())
+
+    doc.add("discord", discord)
+
     return doc
 # fmt: on
+
+
+def remove_nulls(dict_: dict):
+    """
+    TOML doesn't allow nulls
+    """
+    for key, value in list(dict_.items()):
+        if value is None:
+            del dict_[key]
+    return dict_
 
 
 def load_config() -> ConfigDocument:

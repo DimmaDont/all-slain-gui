@@ -23,7 +23,8 @@ from PyQt6.QtWidgets import (
 )
 
 from ..allslain_patch import save_config as save_config_allslain
-from ..config import OverlayPosition, save_config
+from ..config import OverlayPosition, remove_nulls, save_config
+from ..discord import get_webhook
 from ..functions import get_icon
 
 
@@ -123,6 +124,7 @@ class Options(QWidget):
         widget_tab = QTabWidget()
         widget_tab.addTab(self.create_widget_overlay(), "Overlay")
         widget_tab.addTab(self.create_widget_allslain(), "Log")
+        widget_tab.addTab(self.create_widget_discord(), "Discord")
         widget_tab.addTab(self.create_widget_misc(), "Misc.")
         if __debug__:
             widget_tab.addTab(self.create_widget_debug(), "Debug")
@@ -266,6 +268,37 @@ class Options(QWidget):
         widget.setLayout(form)
         return widget
 
+    def create_widget_discord_webhook1(self):
+        form = QFormLayout()
+
+        input_webhook1_enabled = QCheckBox()
+        input_webhook1_enabled.setChecked(
+            self.config_gui["discord"]["webhook1_enabled"]
+        )
+        input_webhook1_enabled.clicked.connect(self.save_webhook1_enabled)
+        form.addRow(QLabel("Enabled " + RED_ASTERISK), input_webhook1_enabled)
+        input_webhook1_url = QLineEdit()
+        input_webhook1_url.setText(self.config_gui["discord"]["webhook1_info"]["url"])
+        input_webhook1_url.textChanged.connect(self.save_webhook1_url)
+        form.addRow(QLabel("Webhook URL " + RED_ASTERISK), input_webhook1_url)
+        self.label_webhook1 = QLabelDisabled(
+            self.config_gui["discord"]["webhook1_info"].get("name", "")
+        )
+        form.addRow(self.label_webhook1)
+
+        widget = QGroupBox("Webhook 1")
+        widget.setLayout(form)
+        return widget
+
+    def create_widget_discord(self):
+        form = QFormLayout()
+
+        form.addRow(self.create_widget_discord_webhook1())
+
+        widget = QWidget()
+        widget.setLayout(form)
+        return widget
+
     def create_widget_misc(self):
         form = QFormLayout()
 
@@ -372,3 +405,16 @@ class Options(QWidget):
             mode_text.upper()
         ]
         save_config_allslain(self.config_als)
+
+    def save_webhook1_enabled(self, enabled: bool):
+        self.config_gui["discord"]["webhook1_enabled"] = enabled
+        save_config(self.config_gui)
+
+    def save_webhook1_url(self, url: str):
+        webhook_info = get_webhook(url)
+        if webhook_info:
+            self.config_gui["discord"]["webhook1_info"] = remove_nulls(webhook_info)
+            self.label_webhook1.setText(webhook_info["name"])
+        else:
+            self.config_gui["discord"]["webhook1_info"] = {"url": url}
+        save_config(self.config_gui)

@@ -11,7 +11,7 @@ class App(QApplication):
         super().__init__(argv)
         self.config = load_config()
         self.args = parse_args(namespace=load_config_runtime())
-        self.allslain = AllSlain(self.args)
+        self.allslain = AllSlain(self.args, self.config)
         self.main_window = MainWindow(self)
         self.aboutToQuit.connect(self.allslain.stopping)
         self.allslain.game_exit.connect(self.quit)
