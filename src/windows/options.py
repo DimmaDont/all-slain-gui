@@ -287,11 +287,22 @@ class Options(QWidget):
         widget.setLayout(form)
         return widget
 
+    def _debug_has_update(self):
+        self.parent().uc.debug_has_update = True
+        self.parent().uc.start()
+        self.input_fake_update.setEnabled(False)
+
     def create_widget_debug(self):
         if not __debug__:
             return None
 
         form = QFormLayout()
+
+        self.input_fake_update = QPushButton()
+        self.input_fake_update.setText("Update!")
+        self.input_fake_update.clicked.connect(self._debug_has_update)
+        form.addRow(self.input_fake_update)
+        form.addRow(hr())
 
         widget = QWidget()
         widget.setLayout(form)

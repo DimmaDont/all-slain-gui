@@ -27,6 +27,8 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.app = app
 
+        self.uc = UpdateCheck()
+
         self.about = About(self)
         self.options = Options(self)
 
@@ -44,11 +46,11 @@ class MainWindow(QMainWindow):
         if __debug__:
             QTimer().singleShot(250, self.init_debug)
 
+        self.uc.result.connect(self.tray_icon.enable_update_button)
+        self.uc.result.connect(self.overlay.add_message_update_available)
+        self.uc.result.connect(self.about.show_update_check_result)
+
         if self.app.config["main"]["check_updates"]:
-            self.uc = UpdateCheck()
-            self.uc.result.connect(self.tray_icon.enable_update_button)
-            self.uc.result.connect(self.overlay.add_message_update_available)
-            self.uc.result.connect(self.about.show_update_check_result)
             QTimer().singleShot(250, self.uc.start)
 
     def slot_reboot(self):

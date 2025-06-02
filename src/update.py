@@ -19,6 +19,7 @@ logger = logging.getLogger("all-slain-gui").getChild("update")
 
 class UpdateCheck(QThread):
     result = Signal(VersionCheckResult)
+    debug_has_update: bool = False
 
     def __init__(self):
         super().__init__()
@@ -29,12 +30,14 @@ class UpdateCheck(QThread):
         if not __debug__:
             response = get_latest_version("all-slain-gui")
         else:
-            self.msleep(1000)
-            response = VersionCheckResult(
-                None,
-                Version("1.0.0"),
-                "file:///C:/Python313/Doc/html/index.html",
+            self.result.emit(
+                VersionCheckResult(
+                    None if self.debug_has_update else "no updates",
+                    Version("0.1.0"),
+                    "https://example.com",
+                )
             )
+            return
         logger.debug("update check complete")
         if response.error or cast(Version, response.version) > Version(
             version("allslain_gui")
