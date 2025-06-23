@@ -141,7 +141,7 @@ class AllSlain(QThread):
         _self._initialized = False
         _self._stopping = False
 
-        def handler_output(self: Handler, text: str):
+        def handler_output(self: Handler, data: str | tuple[int, str]):
             dt_local = (
                 datetime.datetime.strptime(
                     self.state.curr_event_timestr, "%Y-%m-%d %H:%M:%S"
@@ -149,7 +149,11 @@ class AllSlain(QThread):
                 .replace(tzinfo=datetime.timezone.utc)
                 .astimezone()
             ).strftime("%Y-%m-%d %H:%M:%S")
-            _self.output.emit(f"{dt_local}{self.header_text}: {text}")
+
+            if isinstance(data, tuple):
+                _self.output.emit((data[0], f"{dt_local}{self.header_text}: {data[1]}"))
+            else:
+                _self.output.emit(f"{dt_local}{self.header_text}: {data}")
 
         Handler.output = handler_output
 
@@ -210,7 +214,8 @@ class AllSlain(QThread):
 
                     if ansi_text:
                         post_webhook(
-                            gui_config["discord"]["webhook1_info"]["url"], ansi_text
+                            gui_config["discord"]["webhook1_info"]["url"],
+                            cast(str, ansi_text),
                         )
 
             KillP.__call__ = handler_call_discord

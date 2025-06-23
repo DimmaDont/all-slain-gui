@@ -102,9 +102,17 @@ class Overlay(QWidget):
             win32con.WS_EX_NOACTIVATE,
         )
 
-    def update_text(self, text: str):
-        self.lines.popleft()
-        self.lines.append(text)
+    def update_text(self, line: str | tuple[int, str]):
+        if isinstance(line, tuple):
+            if line[0] == -1:
+                self.lines.pop()
+            else:
+                # 0
+                self.lines.popleft()
+            self.lines.append(line[1])
+        else:
+            self.lines.popleft()
+            self.lines.append(line)
         self.text.setText("<br>".join(self.lines))
 
     def update_position(self, pos_name: str):
