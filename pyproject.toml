@@ -11,14 +11,10 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 
 dependencies = [
-    "allslain @ git+https://github.com/DimmaDont/all-slain",
-    "beautifulsoup4",
+    "allslain[app] @ git+https://github.com/DimmaDont/all-slain",
     "psutil",
     "pyqt6",
     "pywin32",
-    "requests",
-    "semver",
-    "tomlkit",
 ]
 
 [project.optional-dependencies]
